@@ -1,0 +1,4360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Presentation System</title>
+    <meta name="description" content="A premium, scalable web-based presentation system built with GSAP, Lenis, and Lucide.">
+    
+    <!-- Google Fonts: Sora (Headings) & Manrope (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- External Libraries (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --accent-color: #3b82f6;
+            --secondary-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Sora', sans-serif;
+        }
+
+        /* Lenis Smooth Scroll */
+        html.lenis {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+
+        /* Layout */
+        #slides {
+            width: 100%;
+            display: block;
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .slide:nth-child(even) {
+            background: var(--secondary-color);
+        }
+
+        .slide-content {
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a5568 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.25rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        /* Presentation Mode UI */
+        .ui-overlay {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            gap: 1rem;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: auto;
+        }
+
+        body.presentation-mode .ui-overlay,
+        body.presentation-mode .nav-hints,
+        body.presentation-mode #mobile-toggle {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        body.presentation-mode {
+            overflow: hidden !important;
+        }
+
+        /* Hide elements initially ONLY in presentation mode for GSAP animations */
+        body.presentation-mode .title-premium,
+        body.presentation-mode .subtitle-premium,
+        body.presentation-mode .detail-item,
+        body.presentation-mode .tagline-premium,
+        body.presentation-mode .header-strip,
+        body.presentation-mode .slide-2-title,
+        body.presentation-mode .slide-2-points li,
+        body.presentation-mode .slide-2-reflection,
+        body.presentation-mode .slide-2-right,
+        body.presentation-mode .slide-3-glass-card,
+        body.presentation-mode .slide-3-title,
+        body.presentation-mode .slide-3-points li,
+        body.presentation-mode .slide-3-reflection,
+        body.presentation-mode .hw-component,
+        body.presentation-mode .slide-4-title,
+        body.presentation-mode .slide-4-points li,
+        body.presentation-mode .slide-4-reflection,
+        body.presentation-mode .tool-panel,
+        body.presentation-mode .workflow-line,
+        body.presentation-mode .lab-status-bar,
+        body.presentation-mode .slide-5-title,
+        body.presentation-mode .arduino-core,
+        body.presentation-mode .node,
+        body.presentation-mode .signal-line,
+        body.presentation-mode .data-dot,
+        body.presentation-mode .slide-5-reflection,
+        body.presentation-mode .slide-6-title,
+        body.presentation-mode .skill-card,
+        body.presentation-mode .slide-6-reflection,
+        body.presentation-mode .slide-7-header,
+        body.presentation-mode .problem-panel,
+        body.presentation-mode .solution-panel,
+        body.presentation-mode .panel-divider,
+        body.presentation-mode .slide-7-highlight,
+        body.presentation-mode .slide-8-title,
+        body.presentation-mode .central-hub,
+        body.presentation-mode .peripheral,
+        body.presentation-mode .software-layer,
+        body.presentation-mode .concepts-layer,
+        body.presentation-mode .slide-9-left,
+        body.presentation-mode .slide-9-right,
+        body.presentation-mode .slide-content {
+            opacity: 0;
+            will-change: transform, opacity, filter;
+        }
+
+        body.presentation-mode .tagline-premium,
+        body.presentation-mode .slide-2-reflection,
+        body.presentation-mode .slide-4-reflection {
+            filter: blur(10px);
+        }
+
+        body.presentation-mode #slides {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            height: 100vh;
+            width: 1200%; /* 12 slides * 100% */
+        }
+
+        body.presentation-mode .slide {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            border-bottom: none;
+        }
+
+        /* Mobile Controls */
+        #mobile-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--text-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        #mobile-toggle:hover {
+            transform: scale(1.05) translateY(-2px);
+        }
+
+        #mobile-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Navigation Hints */
+        .nav-hints {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            gap: 1rem;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        body.presentation-mode .nav-hints {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ui-overlay {
+                top: 1rem;
+                right: 1.5rem;
+            }
+            .nav-hints {
+                display: none;
+            }
+        }
+        /* Slide 1 Premium Styles */
+        #slide-1 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #f8fafc; /* Fallback base */
+            border-bottom: none; /* Remove default border for immersive feel */
+        }
+
+        .slide-1-bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .slide-1-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, #ffffff, #e0e7ff, #f8fafc);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .slide-1-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.1;
+            filter: blur(2px);
+            z-index: 2;
+            transform-origin: center center;
+        }
+
+        .premium-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90vw;
+            max-width: 1400px; /* Increased max width for full screen airy feel */
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            z-index: 10;
+        }
+
+        .title-premium {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4.5vw, 64px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin: 0 auto;
+            max-width: 900px;
+            background: linear-gradient(135deg, #0f172a 0%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle-premium {
+            font-size: clamp(1.5rem, 3vw, 32px);
+            color: #475569;
+            font-weight: 500;
+            max-width: 900px;
+        }
+
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            justify-content: center;
+            max-width: 800px;
+            column-gap: 6rem;
+            row-gap: 1.5rem;
+            width: 100%;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .detail-label {
+            font-family: 'Sora', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #0ea5e9;
+        }
+
+        .detail-value {
+            font-size: 1.25rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .tagline-premium {
+            margin-top: 2rem;
+            font-size: 1rem;
+            font-style: italic;
+            color: #64748b;
+            font-weight: 300;
+        }
+
+        /* Subtle Background Glow */
+        .bg-glow {
+            position: absolute;
+            width: 80vw;
+            height: 80vh;
+            top: 10vh;
+            left: 10vw;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Header Strip */
+        .header-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .header-strip img {
+            max-height: 90px;
+            object-fit: contain;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header-strip {
+                padding: 1.5rem;
+            }
+            .header-strip img {
+                max-height: 40px;
+            }
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+                text-align: center;
+            }
+
+            .premium-container {
+                gap: 1.5rem;
+                position: relative;
+                top: auto;
+                left: auto;
+                transform: none;
+                justify-content: center;
+                height: 100%;
+            }
+            #slide-1 {
+                display: flex;
+            }
+        }
+
+        /* Slide 2 Styles */
+        #slide-2 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: none;
+            background: #fff;
+        }
+
+        .slide-2-bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-2-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f0f4f8 0%, #dbeafe 50%, #e0e7ff 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        .slide-2-grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(#94a3b8 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.15;
+        }
+
+        .slide-2-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .slide-2-left {
+            flex: 0 0 50%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .slide-2-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 56px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .slide-2-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .slide-2-points li {
+            font-size: clamp(1.1rem, 2vw, 22px);
+            color: #334155;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .slide-2-points li::before {
+            content: "→";
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .slide-2-reflection {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #64748b;
+            padding-left: 1.5rem;
+            border-left: 3px solid #cbd5e1;
+            margin-top: 1rem;
+        }
+
+        .slide-2-right {
+            flex: 0 0 40%;
+        }
+
+        /* CSS Editor */
+        .css-editor {
+            background: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .editor-header {
+            background: #2d2d2d;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .editor-body {
+            padding: 24px;
+            color: #d4d4d4;
+            position: relative;
+        }
+        
+        .editor-body p {
+            margin: 0;
+            font-size: 1rem;
+            color: #d4d4d4;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .editor-body .indent { padding-left: 24px; }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .comment { color: #6a9955; font-style: italic; }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background: #fff;
+            vertical-align: bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Presentation Mode Slide 2 */
+        body.presentation-mode #slide-2 .slide-2-title {
+            font-size: clamp(3.5rem, 6vw, 80px);
+        }
+        body.presentation-mode #slide-2 .slide-2-points li {
+            font-size: clamp(1.25rem, 2.5vw, 28px);
+            gap: 1.5rem;
+        }
+        body.presentation-mode #slide-2 .slide-2-reflection {
+            font-size: 1.35rem;
+        }
+        body.presentation-mode #slide-2 .slide-2-container {
+            max-width: 1600px;
+            gap: 6rem;
+        }
+        body.presentation-mode #slide-2 .editor-body p {
+            font-size: 1.25rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 900px) {
+            .slide-2-container {
+                flex-direction: column;
+                gap: 2rem;
+                padding-top: 4rem;
+            }
+            .slide-2-left, .slide-2-right {
+                flex: none;
+                width: 100%;
+            }
+            .slide-2-title { font-size: 2.5rem; }
+        }
+
+        /* Slide 3 Styles */
+        #slide-3 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background: #fff;
+        }
+
+        .slide-3-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-3-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-3-pcb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.12;
+            filter: blur(2px);
+            position: absolute;
+            z-index: 2;
+            will-change: transform;
+        }
+
+        .slide-3-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4rem;
+        }
+
+        .slide-3-left {
+            flex: 0 0 50%;
+        }
+
+        .slide-3-right {
+            flex: 0 0 45%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-3-glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+        }
+
+        .slide-3-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 48px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 2rem 0;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .slide-3-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .slide-3-points li {
+            font-size: clamp(1rem, 1.5vw, 18px);
+            color: #334155;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .slide-3-points li::before {
+            content: "•";
+            color: #0ea5e9;
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 0.8;
+        }
+
+        .slide-3-reflection {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #475569;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Components Showcase */
+        .components-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .hw-component {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hw-component img {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15));
+            border-radius: 12px;
+            background: transparent;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hw-component:hover img {
+            transform: scale(1.15) translateY(-5px);
+        }
+
+        .hw-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Presentation Mode Slide 3 */
+        body.presentation-mode #slide-3 .slide-3-container {
+            max-width: 1500px;
+            gap: 4rem;
+        }
+        body.presentation-mode #slide-3 .slide-3-glass-card {
+            padding: 3rem;
+        }
+        body.presentation-mode #slide-3 .slide-3-title {
+            font-size: clamp(2.5rem, 4vw, 52px);
+        }
+        body.presentation-mode #slide-3 .slide-3-points li {
+            font-size: clamp(1rem, 1.8vw, 20px);
+            gap: 0.75rem;
+        }
+        body.presentation-mode #slide-3 .slide-3-reflection {
+            font-size: 1.15rem;
+        }
+        body.presentation-mode #slide-3 .hw-component img {
+            width: 150px;
+            height: 150px;
+        }
+
+        @media (max-width: 900px) {
+            .slide-3-container { flex-direction: column; padding: 4rem 5vw; }
+            .slide-3-left, .slide-3-right { flex: none; width: 100%; }
+            .slide-3-glass-card { width: 100%; min-width: 0; padding: 2.5rem; }
+            .hw-component img { width: 90px; height: 90px; }
+        }
+
+        /* Slide 4 Styles */
+        #slide-4 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+        }
+
+        .slide-4-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-4-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.85) 100%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-4-bg-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35;
+            mix-blend-mode: multiply;
+            filter: blur(4px);
+            position: absolute;
+            z-index: 2;
+            will-change: transform;
+        }
+
+        .slide-4-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5rem;
+        }
+
+        .slide-4-left {
+            flex: 0 0 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-4-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 56px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 2.5rem 0;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .slide-4-points {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 3rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .slide-4-points li {
+            font-size: clamp(1.1rem, 1.8vw, 22px);
+            color: #334155;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slide-4-points li::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #0ea5e9;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        }
+
+        .slide-4-reflection {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #64748b;
+            padding-left: 1.5rem;
+            border-left: 3px solid #cbd5e1;
+            margin: 0;
+        }
+
+        .slide-4-right {
+            flex: 0 0 40%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .workflow-line {
+            position: absolute;
+            left: 28px;
+            top: 2rem;
+            bottom: 2rem;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, #cbd5e1 15%, #cbd5e1 85%, transparent);
+            z-index: 1;
+        }
+
+        .tool-panel {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .tool-panel:hover {
+            transform: translateX(10px);
+            box-shadow: 0 15px 40px -10px rgba(14, 165, 233, 0.15);
+            border-color: rgba(14, 165, 233, 0.3);
+        }
+
+        .panel-icon {
+            width: 56px;
+            height: 56px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0ea5e9;
+            flex-shrink: 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .panel-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.25rem;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .panel-info p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+
+        .lab-status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: #0f172a;
+            color: #94a3b8;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            padding: 0 4rem;
+            letter-spacing: 0.1em;
+            z-index: 15;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 0 8px #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-4 .slide-4-container {
+            max-width: 1500px;
+            gap: 6rem;
+        }
+        body.presentation-mode #slide-4 .slide-4-title {
+            font-size: clamp(3rem, 5vw, 64px);
+        }
+        body.presentation-mode #slide-4 .slide-4-points li {
+            font-size: clamp(1.2rem, 2vw, 24px);
+        }
+        body.presentation-mode #slide-4 .slide-4-reflection {
+            font-size: 1.35rem;
+        }
+        body.presentation-mode #slide-4 .tool-panel {
+            padding: 2rem;
+            border-radius: 20px;
+        }
+        body.presentation-mode #slide-4 .panel-icon {
+            width: 64px;
+            height: 64px;
+        }
+
+        @media (max-width: 900px) {
+            .slide-4-container { flex-direction: column; gap: 3rem; }
+            .slide-4-left, .slide-4-right { flex: none; width: 100%; }
+            .workflow-line { display: none; }
+        }
+
+        /* Slide 5 Styles */
+        #slide-5 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #0f172a; /* Deep tech blue/black */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-5-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-5-gradient {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-5-grid {
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .slide-5-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            height: 85vh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .slide-5-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 56px);
+            font-weight: 800;
+            color: #f8fafc;
+            text-align: center;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+        }
+
+        .system-architecture {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arduino-core {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid #0ea5e9;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #f8fafc;
+            z-index: 5;
+            box-shadow: 0 0 40px rgba(14, 165, 233, 0.4), inset 0 0 20px rgba(14, 165, 233, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .arduino-core h3 {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .arduino-core p {
+            margin: 5px 0 0 0;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .core-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            box-shadow: 0 0 60px #0ea5e9;
+            opacity: 0.5;
+            z-index: -1;
+            animation: corePulse 3s infinite alternate;
+        }
+
+        @keyframes corePulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .node {
+            position: absolute;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #e2e8f0;
+            z-index: 4;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: border-color 0.3s;
+        }
+
+        .node:hover {
+            border-color: #0ea5e9;
+            box-shadow: 0 10px 30px rgba(14,165,233,0.3);
+        }
+
+        .node-icon {
+            color: #38bdf8;
+            background: rgba(14, 165, 233, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .node-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Fixed positions relative to the container */
+        .node-tl { top: 15%; left: 10%; }
+        .node-tr { top: 15%; right: 10%; }
+        .node-bl { bottom: 15%; left: 10%; }
+        .node-br { bottom: 15%; right: 10%; }
+
+        .connection-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .signal-line {
+            stroke: rgba(14, 165, 233, 0.3);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        .data-dot {
+            fill: #38bdf8;
+            filter: drop-shadow(0 0 6px #38bdf8);
+        }
+
+        .slide-5-reflection {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #94a3b8;
+            text-align: center;
+            margin: 0;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-5 .slide-5-container {
+            max-width: 1600px;
+        }
+        body.presentation-mode #slide-5 .slide-5-title {
+            font-size: clamp(3rem, 5vw, 64px);
+        }
+        body.presentation-mode #slide-5 .arduino-core {
+            width: 220px;
+            height: 220px;
+        }
+        body.presentation-mode #slide-5 .node {
+            padding: 1.5rem 2rem;
+        }
+        body.presentation-mode #slide-5 .node-label {
+            font-size: 1.35rem;
+        }
+
+        @media (max-width: 900px) {
+            .system-architecture {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                height: auto;
+            }
+            .node { position: static; width: 100%; justify-content: flex-start; }
+            .connection-lines { display: none; }
+        }
+
+        /* Slide 6 Styles */
+        #slide-6 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a; /* Match Slide 5 dark theme */
+        }
+
+        .slide-6-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-6-gradient {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 50% 100%, rgba(14, 165, 233, 0.1) 0%, transparent 60%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-6-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 2;
+        }
+
+        .slide-6-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem; /* Reduced to prevent vertical cutoff */
+        }
+
+        .slide-6-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.2rem, 3.5vw, 48px);
+            font-weight: 800;
+            color: #f8fafc;
+            margin: 0;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .skill-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .skill-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: calc(33.333% - 1rem); /* Fits 3 per row precisely */
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .skill-icon {
+            color: #818cf8;
+            background: rgba(99, 102, 241, 0.15);
+            padding: 0.8rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .skill-card h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .skill-card p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .slide-6-reflection {
+            font-size: 1.05rem;
+            font-style: italic;
+            color: #94a3b8;
+            text-align: center;
+            margin: 0;
+            padding: 0.75rem 2rem;
+            border-radius: 99px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-6 .slide-6-container {
+            max-width: 1200px;
+            gap: 2.5rem; /* Tightly controlled */
+        }
+        body.presentation-mode #slide-6 .skill-grid {
+            gap: 1.5rem;
+        }
+        body.presentation-mode #slide-6 .skill-card {
+            padding: 1.75rem 1.5rem;
+            width: calc(33.333% - 1rem); /* Force 3 columns */
+        }
+        body.presentation-mode #slide-6 .slide-6-title {
+            font-size: clamp(2.5rem, 4vw, 56px);
+        }
+
+        @media (max-width: 900px) {
+            .skill-card { width: calc(50% - 1rem); }
+        }
+        @media (max-width: 600px) {
+            .skill-card { width: 100%; }
+        }
+
+        /* Slide 7 Styles */
+        #slide-7 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc; /* Transition back to light theme */
+        }
+
+        .slide-7-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-7-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.4) 0%, rgba(255,255,255,1) 50%, rgba(224, 242, 254, 0.5) 100%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-7-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .slide-7-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .slide-7-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 56px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .slide-7-kicker {
+            font-size: clamp(1.2rem, 2vw, 24px);
+            color: #64748b;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .split-panels {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .project-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .problem-panel {
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-top: 4px solid #ef4444;
+        }
+
+        .solution-panel {
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            border-top: 4px solid #0ea5e9;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .problem-panel .panel-icon {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .solution-panel .panel-icon {
+            color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .project-panel h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .panel-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .panel-points li {
+            font-size: 1.05rem;
+            color: #475569;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            line-height: 1.5;
+        }
+
+        .problem-panel .panel-points li::before {
+            content: "✕";
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .solution-panel .panel-points li::before {
+            content: "✓";
+            color: #0ea5e9;
+            font-weight: bold;
+        }
+
+        .panel-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            padding: 0 1rem;
+        }
+
+        .slide-7-highlight {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem 2.5rem;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+            margin-top: 1rem;
+        }
+
+        .slide-7-highlight i {
+            color: #38bdf8;
+        }
+
+        .slide-7-highlight p {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-7 .slide-7-container {
+            gap: 2.5rem; /* Tightly controlled to prevent vertical clipping */
+            max-width: 1300px;
+        }
+        body.presentation-mode #slide-7 .slide-7-title {
+            font-size: clamp(2.5rem, 4vw, 56px);
+        }
+        body.presentation-mode #slide-7 .slide-7-kicker {
+            font-size: clamp(1.4rem, 2.5vw, 28px);
+            margin-top: 0;
+        }
+        body.presentation-mode #slide-7 .project-panel {
+            padding: 2.5rem 3rem;
+        }
+        body.presentation-mode #slide-7 .panel-points li {
+            font-size: 1.15rem;
+            gap: 1rem;
+        }
+        body.presentation-mode #slide-7 .slide-7-highlight {
+            padding: 1rem 3rem;
+        }
+        body.presentation-mode #slide-7 .slide-7-highlight p {
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .split-panels { flex-direction: column; }
+            .panel-divider { display: none; }
+        }
+
+        /* Slide 8 Styles */
+        #slide-8 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .slide-8-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slide-8-gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .slide-8-pattern {
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.4;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .slide-8-container {
+            position: relative;
+            z-index: 10;
+            width: 95vw;
+            max-width: 1100px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .slide-8-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2rem, 3.5vw, 42px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .layer-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        /* Hardware Layer */
+        .hardware-layer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch; /* Forces equal height for all cards */
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(224, 242, 254, 0.8);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            backdrop-filter: blur(8px);
+            width: 100%;
+        }
+
+        .hw-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            padding: 1rem 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 130px;
+        }
+        
+        .hw-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
+        }
+
+        .hw-node img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            margin-bottom: 0.75rem;
+        }
+
+        .hw-node span {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .central-hub {
+            position: relative;
+            border: 2px solid #0ea5e9;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
+            z-index: 5;
+            padding: 1rem;
+            width: 160px;
+        }
+        
+        .central-hub:hover {
+            transform: translateY(-5px);
+        }
+
+        .central-hub img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .central-hub small {
+            color: #0ea5e9;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .hub-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 12px;
+            box-shadow: 0 0 30px #0ea5e9;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        /* Bottom Layers */
+        .bottom-layers {
+            display: flex;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .software-layer, .concepts-layer {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(224, 242, 254, 0.8);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .sw-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .sw-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            transition: border-color 0.3s;
+        }
+        
+        .sw-card:hover {
+            border-color: #38bdf8;
+        }
+
+        .sw-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        .fallback-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            color: #38bdf8;
+            border-radius: 8px;
+        }
+
+        .sw-card h4 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .sw-card p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .concept-tags {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .concept-tags li {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .concept-tags li::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0ea5e9;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-8 .slide-8-container {
+            max-width: 1200px;
+            gap: 2rem;
+        }
+        body.presentation-mode #slide-8 .slide-8-title {
+            font-size: clamp(2.5rem, 4vw, 56px);
+        }
+        body.presentation-mode #slide-8 .hardware-layer {
+            padding: 2rem;
+            gap: 1.5rem;
+        }
+        body.presentation-mode #slide-8 .hw-node {
+            width: 140px;
+            padding: 1.25rem 0.5rem;
+        }
+        body.presentation-mode #slide-8 .central-hub {
+            width: 180px;
+        }
+        body.presentation-mode #slide-8 .hw-node img {
+            width: 70px;
+            height: 70px;
+        }
+        body.presentation-mode #slide-8 .central-hub img {
+            width: 100px;
+            height: 100px;
+        }
+        body.presentation-mode #slide-8 .hw-node span {
+            font-size: 1rem;
+        }
+        body.presentation-mode #slide-8 .central-hub small {
+            font-size: 0.75rem;
+        }
+        body.presentation-mode #slide-8 .sw-card {
+            padding: 1rem 1.25rem;
+        }
+        body.presentation-mode #slide-8 .sw-card h4 {
+            font-size: 1.1rem;
+        }
+        body.presentation-mode #slide-8 .sw-card p {
+            font-size: 0.85rem;
+        }
+        body.presentation-mode #slide-8 .concept-tags li {
+            font-size: 1.05rem;
+            padding: 1rem 1.25rem;
+        }
+        
+        @media (max-width: 900px) {
+            .bottom-layers { flex-direction: column; }
+        }
+
+        /* Slide 9 Styles */
+        #slide-9 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+        }
+
+        .slide-9-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(203, 213, 225, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(203, 213, 225, 0.8) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to { background-position: 50px 50px; }
+        }
+
+        .slide-9-container {
+            position: relative;
+            z-index: 10;
+            width: 95vw;
+            max-width: 1400px;
+            height: 85vh; /* Controlled height */
+            display: flex;
+            align-items: stretch;
+            gap: 3rem;
+            margin: 0 auto;
+        }
+
+        /* Left side: Circuit */
+        .slide-9-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .circuit-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .circuit-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1s ease-out;
+        }
+
+        .circuit-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(15, 23, 42, 0.8));
+            padding: 1.5rem;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Right side: Workflow */
+        .slide-9-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .slide-9-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2rem, 3.5vw, 42px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            padding-left: 1rem;
+            border-left: 6px solid #38bdf8;
+        }
+
+        .workflow-panel {
+            flex: 1;
+            background: #0f172a; /* Dark mode panel */
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+            border: 1px solid #1e293b;
+        }
+
+        .wf-graph {
+            position: relative;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Connecting lines using absolute divs */
+        .wf-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+        
+        .wf-l1 { top: 15%; left: 50%; width: 2px; height: 35%; transform: translateX(-50%); }
+        .wf-l2 { top: 50%; left: 25%; width: 50%; height: 2px; }
+        .wf-l3 { top: 50%; left: 25%; width: 2px; height: 30%; transform: translateX(-50%); }
+        .wf-l4 { top: 50%; left: 75%; width: 2px; height: 30%; transform: translateX(-50%); }
+
+        .wf-line-active {
+            position: absolute;
+            z-index: 2;
+        }
+        
+        .wf-a1 { top: 15%; left: 50%; width: 2px; height: 0%; background: #38bdf8; transform: translateX(-50%); }
+        .wf-a2-left { top: 50%; right: 50%; width: 0%; height: 2px; background: #10b981; }
+        .wf-a2-right { top: 50%; left: 50%; width: 0%; height: 2px; background: #ef4444; }
+        .wf-a3 { top: 50%; left: 25%; width: 2px; height: 0%; background: #10b981; transform: translateX(-50%); }
+        .wf-a4 { top: 50%; left: 75%; width: 2px; height: 0%; background: #ef4444; transform: translateX(-50%); }
+
+        .wf-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            z-index: 10;
+            top: 15%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #fff;
+            opacity: 0;
+        }
+
+        .wf-node {
+            position: absolute;
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 5;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .wf-node i { color: #94a3b8; transition: all 0.3s; }
+        .wf-node span { font-weight: 600; font-size: 0.85rem; display: flex; flex-direction: column; }
+        .wf-node span small { font-size: 0.65rem; color: #64748b; font-weight: normal; margin-top: 0.1rem; }
+
+        .node-in { top: 15%; left: 50%; }
+        .node-cpu { top: 50%; left: 50%; border-color: #38bdf8; }
+        .node-cpu i { color: #38bdf8; }
+        .node-yes { top: 80%; left: 25%; }
+        .node-no { top: 80%; left: 75%; }
+
+        .node-yes.active { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .node-yes.active i { color: #10b981; }
+        .node-no.active { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .node-no.active i { color: #ef4444; }
+
+        .node-cpu .pulse {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 12px;
+            border: 2px solid #38bdf8;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        /* LCD Display */
+        .wf-lcd {
+            background: #0ea5e9;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 4px solid #1e293b;
+            text-align: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .lcd-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.3s;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-9 .slide-9-container {
+            max-width: 1400px;
+            gap: 4rem;
+        }
+        body.presentation-mode #slide-9 .slide-9-title {
+            font-size: clamp(2.5rem, 4vw, 56px);
+        }
+        body.presentation-mode #slide-9 .wf-node {
+            padding: 1rem 1.5rem;
+        }
+        body.presentation-mode #slide-9 .wf-node span {
+            font-size: 1.05rem;
+        }
+        body.presentation-mode #slide-9 .wf-node span small {
+            font-size: 0.8rem;
+        }
+        body.presentation-mode #slide-9 .lcd-text {
+            font-size: 1.75rem;
+        }
+        
+        @media (max-width: 900px) {
+            .slide-9-container { flex-direction: column; }
+        }
+
+        /* Slide 10 Styles */
+        #slide-10 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f3e8ff 100%);
+        }
+
+        .s10-bg-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: floatOrb 25s infinite ease-in-out alternate;
+            will-change: transform;
+        }
+        .orb-1 { 
+            width: 50vw; height: 50vw; 
+            background: radial-gradient(circle, #bae6fd 0%, transparent 70%);
+            top: -10%; left: -10%; 
+        }
+        .orb-2 { 
+            width: 60vw; height: 60vw; 
+            background: radial-gradient(circle, #ddd6fe 0%, transparent 70%);
+            bottom: -20%; right: -10%; animation-delay: -5s; 
+        }
+        .orb-3 { 
+            width: 40vw; height: 40vw; 
+            background: radial-gradient(circle, #e0f2fe 0%, transparent 70%);
+            top: 30%; left: 40%; animation-delay: -10s; 
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        .glass-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            z-index: 1;
+            will-change: transform;
+        }
+        .gs-1 { width: 15vw; height: 25vh; top: 15%; right: 15%; transform: rotate(15deg); border-radius: 24px; }
+        .gs-2 { width: 20vw; height: 20vw; bottom: 20%; left: 8%; border-radius: 50%; transform: rotate(-10deg); }
+        .gs-3 { width: 10vw; height: 10vw; top: 40%; right: 40%; border-radius: 50%; background: rgba(255, 255, 255, 0.2); }
+
+        .slide-10-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8vh 0;
+        }
+
+        .s10-header {
+            align-self: flex-start;
+            margin-left: 5%;
+        }
+
+        .s10-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(3rem, 5vw, 64px);
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.05em;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .s10-subtitle {
+            font-size: clamp(1rem, 1.5vw, 24px);
+            color: #64748b;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .s10-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 1;
+            margin: 0 5%;
+            position: relative;
+        }
+
+        .s10-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #fff;
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 42%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            will-change: transform, opacity;
+        }
+
+        .card-left { align-self: flex-start; margin-top: 5vh; }
+        .card-right { align-self: flex-end; margin-bottom: 5vh; }
+
+        .s10-card h3 {
+            font-size: 1.1rem;
+            color: #0ea5e9;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .s10-point {
+            margin-bottom: 1.25rem;
+            font-size: 1.05rem;
+            color: #1e293b;
+            line-height: 1.5;
+            position: relative;
+            padding-left: 1.5rem;
+            font-weight: 500;
+        }
+
+        .s10-point::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            box-shadow: 0 0 10px #8b5cf6;
+        }
+
+        .s10-footer {
+            align-self: center;
+            font-size: clamp(1.2rem, 2vw, 32px);
+            font-weight: 600;
+            color: #0f172a;
+            text-align: center;
+            max-width: 80%;
+            position: relative;
+            padding: 1.5rem 3rem;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .s10-footer::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+            box-shadow: 0 0 15px #8b5cf6;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-10 .slide-10-container {
+            max-width: 1600px;
+        }
+        body.presentation-mode #slide-10 .s10-title {
+            font-size: clamp(4rem, 6vw, 90px);
+        }
+        body.presentation-mode #slide-10 .s10-subtitle {
+            font-size: clamp(1.25rem, 2vw, 28px);
+        }
+        body.presentation-mode #slide-10 .s10-card {
+            padding: 3rem;
+            width: 45%;
+        }
+        body.presentation-mode #slide-10 .s10-card h3 {
+            font-size: 1.25rem;
+        }
+        body.presentation-mode #slide-10 .s10-point {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        body.presentation-mode #slide-10 .s10-footer {
+            font-size: clamp(1.5rem, 2.5vw, 42px);
+        }
+
+        body.presentation-mode #slide-10 .orb,
+        body.presentation-mode #slide-10 .glass-shape,
+        body.presentation-mode #slide-10 .s10-header,
+        body.presentation-mode #slide-10 .s10-card,
+        body.presentation-mode #slide-10 .s10-footer {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        @media (max-width: 900px) {
+            .s10-content { flex-direction: column; gap: 2rem; }
+            .card-left, .card-right { align-self: center; width: 100%; margin: 0; }
+        }
+
+        /* Slide 11 Styles */
+        #slide-11 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #0f172a; /* Dark theme */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-11-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            z-index: 0;
+            opacity: 0.8;
+        }
+
+        .slide-11-bg::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: moveGridDark 60s linear infinite; /* Slowed down for subtlety */
+        }
+
+        @keyframes moveGridDark {
+            from { background-position: 0 0; }
+            to { background-position: 30px 0px; } /* Move only horizontally for subtlety */
+        }
+
+        .slide-11-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1400px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .slide-11-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 56px);
+            font-weight: 800;
+            color: #f8fafc;
+            text-align: center;
+            margin: 0;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            width: 85%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tl-line-base {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 100%; height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-50%);
+        }
+
+        .tl-line-fill {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 0%; height: 2px;
+            background: #38bdf8;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px #38bdf8;
+        }
+
+        .tl-traveling-dot {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 15px 4px #38bdf8;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+        .tl-node-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+        }
+
+        .node-top { justify-content: flex-end; padding-bottom: 20px; transform: translate(-50%, -100%); }
+        .node-bottom { justify-content: flex-start; padding-top: 20px; transform: translate(-50%, 0%); }
+
+        .tl-node {
+            position: absolute;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 2px solid #64748b;
+            z-index: 5;
+            transition: all 0.3s;
+        }
+        
+        .node-top .tl-node { bottom: -7px; }
+        .node-bottom .tl-node { top: -7px; }
+
+        .tl-node.active {
+            border-color: #38bdf8;
+            background: #0ea5e9;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+        }
+
+        .final-node {
+            width: 20px; height: 20px;
+            border-width: 3px;
+        }
+        
+        .node-top .final-node { bottom: -10px; }
+        .node-bottom .final-node { top: -10px; }
+
+        .final-node.active {
+            border-color: #10b981;
+            background: #34d399;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+        }
+
+        .tl-content {
+            text-align: center;
+            opacity: 0;
+        }
+
+        .tl-content h4 {
+            margin: 0 0 0.5rem 0;
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .tl-content h4.highlight {
+            color: #10b981;
+            font-size: 1.15rem;
+        }
+
+        .tl-content p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .path-label {
+            display: block;
+            color: #38bdf8;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .slide-11-footer {
+            font-size: clamp(1rem, 2vw, 24px);
+            color: #cbd5e1;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-align: center;
+            opacity: 0;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-11 .slide-11-container {
+            max-width: 1600px;
+        }
+        body.presentation-mode #slide-11 .timeline-wrapper {
+            width: 90%;
+            height: 400px;
+        }
+        body.presentation-mode #slide-11 .tl-content h4 {
+            font-size: 1.25rem;
+        }
+        body.presentation-mode #slide-11 .tl-content p {
+            font-size: 0.95rem;
+        }
+        body.presentation-mode #slide-11 .slide-11-footer {
+            font-size: clamp(1.2rem, 2.5vw, 32px);
+        }
+        
+        /* Mobile Layout */
+        @media (max-width: 900px) {
+            .timeline-wrapper {
+                flex-direction: column;
+                height: 70vh;
+                width: 100%;
+                align-items: flex-start;
+                padding-left: 20px;
+            }
+            .tl-line-base { width: 2px; height: 100%; top: 0; left: 20px; transform: translateX(-50%); }
+            .tl-line-fill { width: 2px; height: 0%; top: 0; left: 20px; transform: translateX(-50%); }
+            .tl-traveling-dot { top: 0; left: 20px; }
+            
+            .tl-node-container {
+                position: relative;
+                top: auto !important; left: 40px !important;
+                transform: none !important;
+                width: calc(100% - 60px);
+                align-items: flex-start;
+                justify-content: flex-start !important;
+                padding: 0 0 2rem 0 !important;
+            }
+            .tl-content { text-align: left; }
+            .tl-node { top: 5px !important; left: -20px !important; transform: translateX(-50%); }
+        }
+
+        /* Hidden states for GSAP */
+        body.presentation-mode #slide-11 .slide-11-title,
+        body.presentation-mode #slide-11 .tl-node,
+        body.presentation-mode #slide-11 .tl-content,
+        body.presentation-mode #slide-11 .slide-11-footer {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Slide 12 Styles */
+        #slide-12 {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-12-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .s12-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: floatS12 15s infinite ease-in-out alternate;
+        }
+
+        .s12-blob.blob-1 { width: 40vw; height: 40vw; background: #e0f2fe; top: -10%; left: -10%; }
+        .s12-blob.blob-2 { width: 50vw; height: 50vw; background: #ede9fe; bottom: -20%; right: -10%; animation-delay: -5s; }
+        .s12-blob.blob-3 { width: 30vw; height: 30vw; background: #f0fdf4; top: 30%; left: 35%; animation-delay: -10s; }
+
+        @keyframes floatS12 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        .slide-12-container {
+            position: relative;
+            z-index: 10;
+            width: 90vw;
+            max-width: 1000px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .s12-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .s12-title-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .s12-title-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 120%; height: 120%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .slide-12-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(4rem, 8vw, 120px);
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .slide-12-subtext {
+            font-size: clamp(1.5rem, 2vw, 32px);
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .s12-contact-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 100px;
+            padding: 1.5rem 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .s12-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #475569;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .s12-contact-item:hover {
+            color: #0ea5e9;
+        }
+
+        .slide-12-footer {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .slide-12-footer strong {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        /* Presentation Mode Overrides */
+        body.presentation-mode #slide-12 .slide-12-title {
+            font-size: clamp(6rem, 10vw, 160px);
+        }
+        body.presentation-mode #slide-12 .slide-12-subtext {
+            font-size: clamp(2rem, 3vw, 42px);
+            margin-top: 2rem;
+        }
+        body.presentation-mode #slide-12 .s12-contact-item {
+            font-size: 1.25rem;
+        }
+        body.presentation-mode #slide-12 .slide-12-footer {
+            font-size: 1.2rem;
+        }
+        body.presentation-mode #slide-12 .slide-12-footer strong {
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 900px) {
+            .s12-contact-grid {
+                flex-direction: column;
+                border-radius: 24px;
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+        }
+
+        /* Hidden States for GSAP */
+        body.presentation-mode #slide-12 .slide-12-title,
+        body.presentation-mode #slide-12 .slide-12-subtext,
+        body.presentation-mode #slide-12 .s12-contact-grid,
+        body.presentation-mode #slide-12 .slide-12-footer {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ui-overlay">
+        <div class="badge" id="mode-badge">
+            <i data-lucide="eye" size="14"></i>
+            <span>View Mode</span>
+        </div>
+        <div class="badge" id="slide-counter">
+            <span>1 / 12</span>
+        </div>
+    </div>
+
+    <div class="nav-hints">
+        <div class="badge"><i data-lucide="keyboard" size="14"></i> Press 'P' for Presentation</div>
+    </div>
+
+    <main id="slides">
+        <!-- Slide 1 -->
+        <section class="slide" id="slide-1" data-lenis-prevent>
+            <div class="slide-1-bg-layer">
+                <div class="slide-1-gradient"></div>
+                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/abstract_tech_bg_1777230444634.png" alt="Tech Background" class="slide-1-bg-image">
+                <div class="bg-glow"></div>
+            </div>
+
+            <div class="header-strip">
+                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/media__1777231157399.png" alt="Sanketika Polytechnic College Logo">
+                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/media__1777231005328.png" alt="HMIES Solutions PVT LTD Logo">
+            </div>
+            
+            <div class="premium-container">
+                <h1 class="title-premium">Industrial Training Report</h1>
+                <p class="subtitle-premium">From Fundamentals to Real-Time Embedded Systems</p>
+                
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value">Ritesh Bonthalakoti</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Organization</span>
+                        <span class="detail-value">HMI Pvt. Ltd.</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Department</span>
+                        <span class="detail-value">Electronics & Communication Engineering</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duration</span>
+                        <span class="detail-value">Nov 2025 – Apr 2026</span>
+                    </div>
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <span class="detail-label">College</span>
+                        <span class="detail-value">Sanketika Polytechnic College</span>
+                    </div>
+                </div>
+
+                <div class="tagline-premium">
+                    A journey of learning, challenges, and practical system development.
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2 -->
+        <section class="slide" id="slide-2" data-lenis-prevent>
+            <div class="slide-2-bg-layer">
+                <div class="slide-2-gradient"></div>
+                <div class="slide-2-grid-overlay"></div>
+            </div>
+            <div class="slide-2-container">
+                <div class="slide-2-left">
+                    <h2 class="slide-2-title">Where It All Started</h2>
+                    <ul class="slide-2-points">
+                        <li>Introduction to programming concepts</li>
+                        <li>Understanding C language fundamentals</li>
+                        <li>Learning operators, conditions, and loops</li>
+                        <li>Building logical thinking for problem solving</li>
+                        <li>Writing basic programs and improving coding clarity</li>
+                    </ul>
+                    <p class="slide-2-reflection">Initially, understanding coding logic was challenging, but it became the foundation for everything I learned later.</p>
+                </div>
+                <div class="slide-2-right">
+                    <div class="css-editor">
+                        <div class="editor-header">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="editor-body">
+                            <p><span class="keyword">#include</span> <span class="string">&lt;stdio.h&gt;</span></p>
+                            <br>
+                            <p><span class="keyword">int</span> <span class="function">main</span>() {</p>
+                            <p class="indent"><span class="comment">// The journey begins</span></p>
+                            <p class="indent"><span class="function">printf</span>(<span class="string">"Hello, World!\\n"</span>);</p>
+                            <p class="indent"><span class="keyword">return</span> <span class="number">0</span>;</p>
+                            <p>}</p>
+                            <span class="cursor"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3 -->
+        <section class="slide" id="slide-3" data-lenis-prevent>
+            <div class="slide-3-bg">
+                <div class="slide-3-gradient"></div>
+                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/electronics_bg_1777231921183.png" alt="Electronics Background" class="slide-3-pcb">
+            </div>
+            
+            <div class="slide-3-container">
+                <div class="slide-3-left">
+                    <div class="slide-3-glass-card">
+                        <h2 class="slide-3-title">Understanding the Core of Electronics</h2>
+                        <ul class="slide-3-points">
+                            <li>Introduction to basic electronic components</li>
+                            <li>Understanding circuit symbols and connections</li>
+                            <li>Learning rectifiers and power supply concepts</li>
+                            <li>Exploring sensors and their real-time applications</li>
+                            <li>Connecting theory with practical circuits</li>
+                        </ul>
+                        <p class="slide-3-reflection">This phase helped me bridge the gap between theory and how circuits actually behave in real-world conditions.</p>
+                    </div>
+                </div>
+                
+                <div class="slide-3-right">
+                    <div class="components-grid">
+                        <div class="hw-component">
+                            <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/microcontroller_isolated_1777232049871.png" alt="Microcontroller">
+                            <span class="hw-label">ESP32 Core</span>
+                        </div>
+                        <div class="hw-component">
+                            <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/sensor_isolated_1777232070474.png" alt="Ultrasonic Sensor">
+                            <span class="hw-label">HC-SR04 Sensor</span>
+                        </div>
+                        <div class="hw-component">
+                            <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/lcd_isolated_1777232494220.png" alt="LCD Display">
+                            <span class="hw-label">16x2 Display</span>
+                        </div>
+                        <div class="hw-component">
+                            <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/breadboard_isolated_1777232095642.png" alt="Breadboard">
+                            <span class="hw-label">Breadboard Prototyping</span>
+                        </div>
+                        <div class="hw-component">
+                            <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/motor_isolated_1777232470274.png" alt="Servo Motor">
+                            <span class="hw-label">Micro Servo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4 -->
+        <section class="slide" id="slide-4" data-lenis-prevent>
+            <div class="slide-4-bg">
+                <div class="slide-4-gradient"></div>
+                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/workshop_bg_1777233219732.png" alt="Workshop Background" class="slide-4-bg-image">
+            </div>
+
+            <div class="slide-4-container">
+                <div class="slide-4-left">
+                    <h2 class="slide-4-title">From Theory to Practical Implementation</h2>
+                    <ul class="slide-4-points">
+                        <li>Interfacing components like buzzer and relay</li>
+                        <li>Working with breadboard connections</li>
+                        <li>Understanding circuit behavior through hands-on practice</li>
+                        <li>Introduction to soldering techniques</li>
+                        <li>Building small functional circuits</li>
+                    </ul>
+                    <p class="slide-4-reflection">This phase improved my confidence in handling real components and understanding how circuit behavior changes during actual implementation.</p>
+                </div>
+
+                <div class="slide-4-right">
+                    <div class="workflow-line"></div>
+                    <div class="tool-panel">
+                        <div class="panel-icon"><i data-lucide="cpu" size="24"></i></div>
+                        <div class="panel-info">
+                            <h3>Breadboard Wiring</h3>
+                            <p>Prototyping baseline circuits</p>
+                        </div>
+                    </div>
+                    <div class="tool-panel">
+                        <div class="panel-icon"><i data-lucide="zap" size="24"></i></div>
+                        <div class="panel-info">
+                            <h3>Relay & Buzzer</h3>
+                            <p>Interfacing active components</p>
+                        </div>
+                    </div>
+                    <div class="tool-panel">
+                        <div class="panel-icon"><i data-lucide="pen-tool" size="24"></i></div>
+                        <div class="panel-info">
+                            <h3>Soldering Practice</h3>
+                            <p>Permanent circuit assembly</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lab-status-bar">
+                <span class="status-indicator"></span> LAB ENVIRONMENT ACTIVE // WORKSHOP 01
+            </div>
+        </section>
+
+        <!-- Slide 5 -->
+        <section class="slide" id="slide-5" data-lenis-prevent>
+            <div class="slide-5-bg">
+                <div class="slide-5-gradient"></div>
+                <div class="slide-5-grid"></div>
+            </div>
+
+            <div class="slide-5-container">
+                <div class="slide-5-header">
+                    <h2 class="slide-5-title">Introduction to Embedded & Arduino</h2>
+                </div>
+
+                <div class="system-architecture">
+                    <!-- Core -->
+                    <div class="arduino-core">
+                        <div class="core-glow"></div>
+                        <i data-lucide="cpu" size="48"></i>
+                        <h3>Arduino Uno</h3>
+                        <p>Central Control Unit</p>
+                    </div>
+
+                    <!-- SVG Connections -->
+                    <svg class="connection-lines" viewBox="0 0 1000 600" preserveAspectRatio="none">
+                        <line x1="500" y1="300" x2="200" y2="150" class="signal-line line-tl" />
+                        <line x1="500" y1="300" x2="800" y2="150" class="signal-line line-tr" />
+                        <line x1="500" y1="300" x2="200" y2="450" class="signal-line line-bl" />
+                        <line x1="500" y1="300" x2="800" y2="450" class="signal-line line-br" />
+                        
+                        <!-- Animated dots -->
+                        <circle cx="500" cy="300" r="4" class="data-dot dot-1" />
+                        <circle cx="500" cy="300" r="4" class="data-dot dot-2" />
+                        <circle cx="500" cy="300" r="4" class="data-dot dot-3" />
+                        <circle cx="500" cy="300" r="4" class="data-dot dot-4" />
+                    </svg>
+
+                    <!-- Orbiting Nodes -->
+                    <div class="node node-tl">
+                        <div class="node-icon"><i data-lucide="lightbulb" size="24"></i></div>
+                        <span class="node-label">LED & Actuators</span>
+                    </div>
+                    <div class="node node-tr">
+                        <div class="node-icon"><i data-lucide="monitor" size="24"></i></div>
+                        <span class="node-label">LCD Display</span>
+                    </div>
+                    <div class="node node-bl">
+                        <div class="node-icon"><i data-lucide="radio" size="24"></i></div>
+                        <span class="node-label">Sensors</span>
+                    </div>
+                    <div class="node node-br">
+                        <div class="node-icon"><i data-lucide="settings" size="24"></i></div>
+                        <span class="node-label">Motor Control</span>
+                    </div>
+                </div>
+
+                <div class="slide-5-footer">
+                    <p class="slide-5-reflection">This phase marked my transition from basic circuits to building real-time embedded systems.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6 -->
+        <section class="slide" id="slide-6" data-lenis-prevent>
+            <div class="slide-6-bg">
+                <div class="slide-6-gradient"></div>
+                <div class="slide-6-shapes"></div>
+            </div>
+
+            <div class="slide-6-container">
+                <h2 class="slide-6-title">Expanding into Advanced Applications</h2>
+                
+                <div class="skill-grid">
+                    <div class="skill-card">
+                        <div class="skill-icon"><i data-lucide="monitor-play" size="28"></i></div>
+                        <h3>LED & LCD Interfacing</h3>
+                        <p>Visual output control</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon"><i data-lucide="power" size="28"></i></div>
+                        <h3>DC Motor & Relay</h3>
+                        <p>High-power actuation</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon"><i data-lucide="radar" size="28"></i></div>
+                        <h3>Sensor Automation</h3>
+                        <p>Real-time data handling</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon"><i data-lucide="bot" size="28"></i></div>
+                        <h3>Intro to Robotics</h3>
+                        <p>Autonomous systems</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon"><i data-lucide="wifi" size="28"></i></div>
+                        <h3>IoT & ESP32</h3>
+                        <p>Connected ecosystems</p>
+                    </div>
+                </div>
+
+                <p class="slide-6-reflection">At this stage, I started combining multiple concepts to build more advanced and practical systems.</p>
+            </div>
+        </section>
+
+        <!-- Slide 7 -->
+        <section class="slide" id="slide-7" data-lenis-prevent>
+            <div class="slide-7-bg">
+                <div class="slide-7-gradient"></div>
+            </div>
+
+            <div class="slide-7-container">
+                <div class="slide-7-header">
+                    <h2 class="slide-7-title">Project Development Phase</h2>
+                    <p class="slide-7-kicker">Turning concepts into a working security solution.</p>
+                </div>
+
+                <div class="split-panels">
+                    <!-- Problem Panel -->
+                    <div class="project-panel problem-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon"><i data-lucide="shield-alert" size="24"></i></div>
+                            <h3>The Problem</h3>
+                        </div>
+                        <ul class="panel-points">
+                            <li>Traditional key-based locks can be lost, duplicated, or misused</li>
+                            <li>Physical keys reduce flexibility and create security limitations</li>
+                            <li>A more reliable and controlled access method is needed</li>
+                        </ul>
+                    </div>
+
+                    <!-- VS Divider -->
+                    <div class="panel-divider"><i data-lucide="arrow-right" size="32"></i></div>
+
+                    <!-- Solution Panel -->
+                    <div class="project-panel solution-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon"><i data-lucide="shield-check" size="24"></i></div>
+                            <h3>Proposed Solution</h3>
+                        </div>
+                        <ul class="panel-points">
+                            <li>Password-based digital door lock system using Arduino</li>
+                            <li>Access controlled through a 4x4 keypad</li>
+                            <li>Servo motor used for lock and unlock action</li>
+                            <li>LCD display and buzzer used for feedback and alerts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="slide-7-highlight">
+                    <i data-lucide="key" size="24"></i>
+                    <p>A simple password can control secure access through an embedded system.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8 -->
+        <section class="slide" id="slide-8" data-lenis-prevent>
+            <div class="slide-8-bg">
+                <div class="slide-8-gradient"></div>
+                <div class="slide-8-pattern"></div>
+            </div>
+
+            <div class="slide-8-container">
+                <h2 class="slide-8-title">Core Components of the System</h2>
+                
+                <!-- Hardware Layer -->
+                <div class="layer-title">Hardware Architecture</div>
+                <div class="hardware-layer">
+                    <div class="hw-node peripheral">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/matrix_keypad_1777235024979.png" alt="Keypad">
+                        <span>4x4 Keypad</span>
+                    </div>
+                    <div class="hw-node peripheral">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/motor_isolated_1777232470274.png" alt="Servo Motor">
+                        <span>Servo Motor</span>
+                    </div>
+                    
+                    <div class="hw-node central-hub">
+                        <div class="hub-glow"></div>
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/arduino_uno_1777235010107.png" alt="Arduino Uno">
+                        <span>Arduino Uno</span>
+                        <small>Main Microcontroller</small>
+                    </div>
+
+                    <div class="hw-node peripheral">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/lcd_isolated_1777232494220.png" alt="LCD Display">
+                        <span>LCD Display</span>
+                    </div>
+                    <div class="hw-node peripheral">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/piezo_buzzer_1777235040474.png" alt="Buzzer">
+                        <span>Buzzer Alert</span>
+                    </div>
+                    <div class="hw-node peripheral power">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/power_module_1777235061634.png" alt="Power Supply">
+                        <span>Power Supply</span>
+                    </div>
+                </div>
+
+                <!-- Software & Concepts Layer -->
+                <div class="bottom-layers">
+                    <div class="software-layer">
+                        <div class="layer-title">Software Stack</div>
+                        <div class="sw-blocks">
+                            <div class="sw-card">
+                                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/arduino_ide_icon_1777235076038.png" class="sw-logo">
+                                <div>
+                                    <h4>Arduino IDE</h4>
+                                    <p>Development</p>
+                                </div>
+                            </div>
+                            <div class="sw-card">
+                                <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/c_language_icon_1777235091949.png" class="sw-logo">
+                                <div>
+                                    <h4>Embedded C</h4>
+                                    <p>Programming Logic</p>
+                                </div>
+                            </div>
+                            <div class="sw-card">
+                                <div class="sw-logo fallback-logo"><i data-lucide="terminal-square"></i></div>
+                                <div>
+                                    <h4>Serial Monitor</h4>
+                                    <p>Debugging Interface</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="concepts-layer">
+                        <div class="layer-title">Supporting Concepts</div>
+                        <ul class="concept-tags">
+                            <li>Keypad matrix scanning</li>
+                            <li>PWM control for servo</li>
+                            <li>Regulated power supply logic</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9 -->
+        <section class="slide" id="slide-9" data-lenis-prevent>
+            <div class="slide-9-bg"></div>
+
+            <div class="slide-9-container">
+                <div class="slide-9-left">
+                    <div class="circuit-wrapper">
+                        <img src="/C:/Users/Ritesh/.gemini/antigravity/brain/e90d24af-999e-453a-9822-fa87105af766/hand_drawn_circuit_1777235945295.png" alt="Hand Drawn Circuit Diagram">
+                        <div class="circuit-overlay">
+                            <span>System Schematic Diagram</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-9-right">
+                    <h2 class="slide-9-title">System Workflow</h2>
+                    <div class="workflow-panel">
+                        <div class="wf-graph">
+                            <!-- Base lines -->
+                            <div class="wf-line wf-l1"></div>
+                            <div class="wf-line wf-l2"></div>
+                            <div class="wf-line wf-l3"></div>
+                            <div class="wf-line wf-l4"></div>
+
+                            <!-- Animated lines -->
+                            <div class="wf-line-active wf-a1"></div>
+                            <div class="wf-line-active wf-a2-left"></div>
+                            <div class="wf-line-active wf-a2-right"></div>
+                            <div class="wf-line-active wf-a3"></div>
+                            <div class="wf-line-active wf-a4"></div>
+
+                            <!-- Dot -->
+                            <div class="wf-dot"></div>
+
+                            <!-- Nodes -->
+                            <div class="wf-node node-in">
+                                <i data-lucide="calculator" size="24"></i>
+                                <span>1. Keypad Input</span>
+                            </div>
+
+                            <div class="wf-node node-cpu">
+                                <div class="pulse"></div>
+                                <i data-lucide="cpu" size="28"></i>
+                                <span>2. Arduino Processing</span>
+                            </div>
+
+                            <div class="wf-node node-yes">
+                                <i data-lucide="unlock" size="24" class="servo-icon"></i>
+                                <span>Access Granted<small>Servo Rotates</small></span>
+                            </div>
+
+                            <div class="wf-node node-no">
+                                <i data-lucide="bell-ring" size="24" class="buzzer-icon"></i>
+                                <span>Access Denied<small>Buzzer Alerts</small></span>
+                            </div>
+                        </div>
+
+                        <!-- LCD -->
+                        <div class="wf-lcd">
+                            <div class="lcd-text">SYSTEM STANDBY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10 -->
+        <section class="slide" id="slide-10" data-lenis-prevent>
+            <div class="s10-bg-layer">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+                <div class="glass-shape gs-1" data-speed="0.05"></div>
+                <div class="glass-shape gs-2" data-speed="-0.03"></div>
+                <div class="glass-shape gs-3" data-speed="0.08"></div>
+            </div>
+
+            <div class="slide-10-container">
+                <div class="s10-header">
+                    <h2 class="s10-title">Beyond the System</h2>
+                    <p class="s10-subtitle">From a simple prototype to real-world possibilities</p>
+                </div>
+
+                <div class="s10-content">
+                    <div class="s10-card card-left">
+                        <h3>What This Represents</h3>
+                        <div class="s10-point">A practical implementation of embedded system design</div>
+                        <div class="s10-point">A shift from theoretical understanding to real-world application</div>
+                        <div class="s10-point">A foundation for building secure and automated systems</div>
+                    </div>
+
+                    <div class="s10-card card-right">
+                        <h3>Future Possibilities</h3>
+                        <div class="s10-point">Integration with IoT for remote access control</div>
+                        <div class="s10-point">Mobile app-based authentication systems</div>
+                        <div class="s10-point">Biometric-based security (fingerprint / face recognition)</div>
+                        <div class="s10-point">Smart home integration and automation</div>
+                    </div>
+                </div>
+
+                <div class="s10-footer">
+                    "This system is not just a project, it is a starting point for smarter and more secure systems."
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11 -->
+        <section class="slide" id="slide-11" data-lenis-prevent>
+            <div class="slide-11-bg"></div>
+
+            <div class="slide-11-container">
+                <h2 class="slide-11-title">My Industrial Training Journey</h2>
+                
+                <div class="timeline-wrapper">
+                    <!-- The line -->
+                    <div class="tl-line-base"></div>
+                    <div class="tl-line-fill"></div>
+                    <div class="tl-traveling-dot"></div>
+
+                    <!-- Nodes -->
+                    <div class="tl-node-container node-top" style="left: 0%;">
+                        <div class="tl-node"></div>
+                        <div class="tl-content">
+                            <h4>Stage 1: Programming Foundations</h4>
+                            <p>(C basics, logic building, problem solving)</p>
+                        </div>
+                    </div>
+
+                    <div class="tl-node-container node-bottom" style="left: 20%;">
+                        <div class="tl-node"></div>
+                        <div class="tl-content">
+                            <h4>Stage 2: Electronics Understanding</h4>
+                            <p>(components, circuits, sensors)</p>
+                        </div>
+                    </div>
+
+                    <div class="tl-node-container node-top" style="left: 40%;">
+                        <div class="tl-node"></div>
+                        <div class="tl-content">
+                            <h4>Stage 3: Practical Implementation</h4>
+                            <p>(breadboard, soldering, interfacing)</p>
+                        </div>
+                    </div>
+
+                    <div class="tl-node-container node-bottom" style="left: 60%;">
+                        <div class="tl-node"></div>
+                        <div class="tl-content">
+                            <h4>Stage 4: Embedded Systems</h4>
+                            <p>(Arduino, real-time programming)</p>
+                        </div>
+                    </div>
+
+                    <div class="tl-node-container node-top" style="left: 80%;">
+                        <div class="tl-node"></div>
+                        <div class="tl-content">
+                            <h4>Stage 5: Advanced Learning</h4>
+                            <p>(IoT, ESP32, automation concepts)</p>
+                        </div>
+                    </div>
+
+                    <div class="tl-node-container node-bottom node-final" style="left: 100%;">
+                        <div class="tl-node final-node"></div>
+                        <div class="tl-content">
+                            <span class="path-label">Ritesh’s Learning Path</span>
+                            <h4 class="highlight">Stage 6: Final System Built</h4>
+                            <p>(password-based digital door lock system)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-11-footer">
+                    From understanding concepts to building a complete working system.
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12 -->
+        <section class="slide" id="slide-12" data-lenis-prevent>
+            <div class="slide-12-bg">
+                <div class="s12-blob blob-1"></div>
+                <div class="s12-blob blob-2"></div>
+                <div class="s12-blob blob-3"></div>
+            </div>
+
+            <div class="slide-12-container">
+                <div class="s12-main-content">
+                    <div class="s12-title-wrapper">
+                        <div class="s12-title-glow"></div>
+                        <h1 class="slide-12-title">Thank You</h1>
+                    </div>
+                    <p class="slide-12-subtext">Open for Questions</p>
+                </div>
+
+                <div class="s12-contact-grid">
+                    <a href="mailto:bonthalamadhavi1@gmail.com" class="s12-contact-item">
+                        <i data-lucide="mail"></i>
+                        <span>bonthalamadhavi1@gmail.com</span>
+                    </a>
+                    <a href="tel:+918464931322" class="s12-contact-item">
+                        <i data-lucide="phone"></i>
+                        <span>+91 8464931322</span>
+                    </a>
+                    <a href="https://www.linkedin.com/in/ritesh1908/" target="_blank" class="s12-contact-item">
+                        <i data-lucide="linkedin"></i>
+                        <span>linkedin.com/in/ritesh1908</span>
+                    </a>
+                    <a href="https://github.com/ritesh-1918" target="_blank" class="s12-contact-item">
+                        <i data-lucide="github"></i>
+                        <span>github.com/ritesh-1918</span>
+                    </a>
+                </div>
+
+                <div class="slide-12-footer">
+                    <strong>Ritesh Bonthalakoti</strong><br>
+                    Electronics & Communication Engineering
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <button id="mobile-toggle" aria-label="Toggle Presentation Mode">
+        <i data-lucide="play"></i>
+    </button>
+
+    <script>
+        // --- Initialization ---
+        lucide.createIcons();
+        
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // --- State ---
+        let currentSlide = 0;
+        const totalSlides = 12;
+        let isPresentationMode = false;
+        const slidesContainer = document.getElementById('slides');
+        const modeBadge = document.getElementById('mode-badge');
+        const slideCounter = document.getElementById('slide-counter');
+
+        // --- Animation Functions ---
+        window.animateSlide1 = () => {
+            const slide = document.querySelector('#slide-1');
+            const title = slide.querySelector('.title-premium');
+            const subtitle = slide.querySelector('.subtitle-premium');
+            const details = slide.querySelectorAll('.detail-item');
+            const tagline = slide.querySelector('.tagline-premium');
+            const glow = slide.querySelector('.bg-glow');
+            const bgImage = slide.querySelector('.slide-1-bg-image');
+            const headerStrip = slide.querySelector('.header-strip');
+
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+            // Background scale animation
+            gsap.fromTo(bgImage, 
+                { scale: 1 }, 
+                { scale: 1.1, duration: 15, ease: "sine.inOut", repeat: -1, yoyo: true }
+            );
+
+            tl.to(headerStrip, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: -20 }
+            })
+            .to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: 30 }
+            }, "-=1.2")
+            .to(subtitle, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: 20 }
+            }, "-=1.2")
+            .to(details, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                stagger: 0.1,
+                startAt: { y: 15 }
+            }, "-=1.0")
+            .to(tagline, {
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 1.5,
+                startAt: { filter: "blur(10px)" }
+            }, "-=0.8")
+            .to(glow, {
+                scale: 1.1,
+                opacity: 0.8,
+                duration: 6,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            }, 0);
+        };
+
+        window.animateSlide2 = () => {
+            const slide = document.querySelector('#slide-2');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-2-title');
+            const points = slide.querySelectorAll('.slide-2-points li');
+            const rightVisual = slide.querySelector('.slide-2-right');
+            const reflection = slide.querySelector('.slide-2-reflection');
+
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+            tl.to(title, {
+                opacity: 1,
+                x: 0,
+                duration: 1.5,
+                startAt: { x: -30 }
+            })
+            .to(points, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                stagger: 0.1,
+                startAt: { y: 20 }
+            }, "-=1.0")
+            .to(rightVisual, {
+                opacity: 1,
+                scale: 1,
+                duration: 1.5,
+                startAt: { scale: 0.95 }
+            }, "-=1.2")
+            .to(reflection, {
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 1.5,
+                startAt: { filter: "blur(10px)" }
+            }, "-=0.5");
+        };
+
+        window.animateSlide3 = () => {
+            const slide = document.querySelector('#slide-3');
+            if (!slide) return;
+
+            const card = slide.querySelector('.slide-3-glass-card');
+            const title = slide.querySelector('.slide-3-title');
+            const points = slide.querySelectorAll('.slide-3-points li');
+            const reflection = slide.querySelector('.slide-3-reflection');
+            const hwComponents = slide.querySelectorAll('.hw-component');
+            const pcb = slide.querySelector('.slide-3-pcb');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            // Parallax PCB background zoom
+            gsap.fromTo(pcb, 
+                { scale: 1 }, 
+                { scale: 1.05, duration: 20, ease: "sine.inOut", repeat: -1, yoyo: true }
+            );
+
+            tl.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: 40 },
+                ease: "power4.out"
+            })
+            .to(title, {
+                opacity: 1,
+                scale: 1,
+                duration: 1.2,
+                startAt: { scale: 0.95 },
+                ease: "power3.out"
+            }, "-=1.0")
+            .to(points, {
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                stagger: 0.1,
+                startAt: { x: -10 }
+            }, "-=0.8")
+            .to(hwComponents, {
+                opacity: 1,
+                scale: 1,
+                duration: 1.2,
+                stagger: 0.15,
+                startAt: { scale: 0.8 },
+                ease: "back.out(1.5)"
+            }, "-=1.0")
+            .to(reflection, {
+                opacity: 1,
+                duration: 1.5,
+            }, "-=0.5");
+        };
+
+        window.animateSlide4 = () => {
+            const slide = document.querySelector('#slide-4');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-4-title');
+            const points = slide.querySelectorAll('.slide-4-points li');
+            const reflection = slide.querySelector('.slide-4-reflection');
+            const panels = slide.querySelectorAll('.tool-panel');
+            const line = slide.querySelector('.workflow-line');
+            const statusBar = slide.querySelector('.lab-status-bar');
+            const bgImage = slide.querySelector('.slide-4-bg-image');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            // Background subtle parallax
+            gsap.fromTo(bgImage, 
+                { y: -20, scale: 1.05 }, 
+                { y: 20, scale: 1, duration: 25, ease: "sine.inOut", repeat: -1, yoyo: true }
+            );
+
+            tl.to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: 30 }
+            })
+            .to(points, {
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                stagger: 0.1,
+                startAt: { x: -20 }
+            }, "-=0.6")
+            .to(line, {
+                opacity: 1,
+                scaleY: 1,
+                duration: 1,
+                startAt: { scaleY: 0, transformOrigin: "top" },
+                ease: "power2.inOut"
+            }, "-=0.5")
+            .to(panels, {
+                opacity: 1,
+                x: 0,
+                duration: 1.2,
+                stagger: 0.2,
+                startAt: { x: 30 },
+                ease: "back.out(1.2)"
+            }, "-=0.8")
+            .to(reflection, {
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 1.5
+            }, "-=0.5")
+            .to(statusBar, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                startAt: { y: 20 }
+            }, "-=1.0");
+        };
+
+        window.animateSlide5 = () => {
+            const slide = document.querySelector('#slide-5');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-5-title');
+            const core = slide.querySelector('.arduino-core');
+            const nodes = slide.querySelectorAll('.node');
+            const lines = slide.querySelectorAll('.signal-line');
+            const reflection = slide.querySelector('.slide-5-reflection');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            tl.to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: -30 }
+            })
+            .to(core, {
+                opacity: 1,
+                scale: 1,
+                duration: 1.5,
+                startAt: { scale: 0.5 },
+                ease: "back.out(1.5)"
+            }, "-=0.5")
+            .to(lines, {
+                opacity: 1, 
+                strokeDashoffset: 0,
+                duration: 1.5,
+                ease: "power2.inOut"
+            }, "-=0.8")
+            .to(nodes, {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                stagger: 0.15,
+                startAt: { scale: 0.8 },
+                ease: "back.out(1.2)"
+            }, "-=1.0")
+            .to(reflection, {
+                opacity: 1,
+                duration: 1.5
+            }, "-=0.5");
+
+            // Endless data dots pulsing outwards
+            gsap.fromTo('.dot-1', { attr: { cx: 500, cy: 300 }, opacity: 1 }, { attr: { cx: 200, cy: 150 }, opacity: 0, duration: 2, repeat: -1, ease: "none", delay: 1 });
+            gsap.fromTo('.dot-2', { attr: { cx: 500, cy: 300 }, opacity: 1 }, { attr: { cx: 800, cy: 150 }, opacity: 0, duration: 2, repeat: -1, ease: "none", delay: 1.5 });
+            gsap.fromTo('.dot-3', { attr: { cx: 500, cy: 300 }, opacity: 1 }, { attr: { cx: 200, cy: 450 }, opacity: 0, duration: 2, repeat: -1, ease: "none", delay: 1.2 });
+            gsap.fromTo('.dot-4', { attr: { cx: 500, cy: 300 }, opacity: 1 }, { attr: { cx: 800, cy: 450 }, opacity: 0, duration: 2, repeat: -1, ease: "none", delay: 1.7 });
+        };
+
+        window.animateSlide6 = () => {
+            const slide = document.querySelector('#slide-6');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-6-title');
+            const cards = slide.querySelectorAll('.skill-card');
+            const reflection = slide.querySelector('.slide-6-reflection');
+            const shapes = slide.querySelector('.slide-6-shapes');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            // Background floating shapes
+            gsap.fromTo(shapes, 
+                { y: -20, rotation: -2 }, 
+                { y: 20, rotation: 2, duration: 20, ease: "sine.inOut", repeat: -1, yoyo: true }
+            );
+
+            tl.to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: 30 }
+            })
+            .to(cards, {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                stagger: 0.15,
+                startAt: { scale: 0.85, y: 20 },
+                ease: "back.out(1.2)"
+            }, "-=0.6")
+            .to(reflection, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: 20 }
+            }, "-=0.4");
+        };
+
+        window.animateSlide7 = () => {
+            const slide = document.querySelector('#slide-7');
+            if (!slide) return;
+
+            const header = slide.querySelector('.slide-7-header');
+            const problemPanel = slide.querySelector('.problem-panel');
+            const solutionPanel = slide.querySelector('.solution-panel');
+            const divider = slide.querySelector('.panel-divider');
+            const highlight = slide.querySelector('.slide-7-highlight');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            tl.to(header, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: 30 }
+            })
+            .to(problemPanel, {
+                opacity: 1,
+                x: 0,
+                duration: 1.2,
+                startAt: { x: -30 }
+            }, "-=0.6")
+            .to(divider, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                startAt: { scale: 0.5 }
+            }, "-=0.8")
+            .to(solutionPanel, {
+                opacity: 1,
+                x: 0,
+                duration: 1.2,
+                startAt: { x: 30 }
+            }, "-=0.6")
+            .to(highlight, {
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                duration: 1.5,
+                startAt: { y: 20, filter: "blur(10px)" }
+            }, "-=0.5");
+        };
+
+        window.animateSlide8 = () => {
+            const slide = document.querySelector('#slide-8');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-8-title');
+            const centralHub = slide.querySelector('.central-hub');
+            const peripherals = slide.querySelectorAll('.peripheral');
+            const software = slide.querySelector('.software-layer');
+            const concepts = slide.querySelector('.concepts-layer');
+            const glow = slide.querySelector('.hub-glow');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            tl.to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                startAt: { y: 20 }
+            })
+            .to(centralHub, {
+                opacity: 1,
+                scale: 1.15,
+                duration: 1.2,
+                startAt: { scale: 0.5 },
+                ease: "back.out(1.5)"
+            }, "-=0.5")
+            .to(peripherals, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                stagger: 0.1,
+                startAt: { scale: 0.8, y: 10 },
+                ease: "back.out(1.2)"
+            }, "-=0.6")
+            .to(software, {
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                startAt: { x: -30 }
+            }, "-=0.4")
+            .to(concepts, {
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                startAt: { x: 30 }
+            }, "-=0.8")
+            .to(glow, {
+                opacity: 0.8,
+                duration: 0.5,
+                yoyo: true,
+                repeat: 3
+            }, "-=0.5");
+        };
+
+        window.animateSlide9 = () => {
+            const slide = document.querySelector('#slide-9');
+            if (!slide) return;
+
+            const left = slide.querySelector('.slide-9-left');
+            const right = slide.querySelector('.slide-9-right');
+            const circuitImg = slide.querySelector('.circuit-wrapper img');
+            
+            const dot = slide.querySelector('.wf-dot');
+            const a1 = slide.querySelector('.wf-a1');
+            const a2L = slide.querySelector('.wf-a2-left');
+            const a2R = slide.querySelector('.wf-a2-right');
+            const a3 = slide.querySelector('.wf-a3');
+            const a4 = slide.querySelector('.wf-a4');
+            
+            const cpuPulse = slide.querySelector('.node-cpu .pulse');
+            const yesNode = slide.querySelector('.node-yes');
+            const noNode = slide.querySelector('.node-no');
+            const lcdText = slide.querySelector('.lcd-text');
+            const lcdScreen = slide.querySelector('.wf-lcd');
+
+            // Reset states
+            gsap.set([a1, a3, a4], { height: "0%" });
+            gsap.set([a2L, a2R], { width: "0%" });
+            gsap.set(dot, { opacity: 0, top: "15%", left: "50%" });
+            yesNode.classList.remove('active');
+            noNode.classList.remove('active');
+            gsap.set(yesNode.querySelector('i'), { rotation: 0 });
+            gsap.set(noNode.querySelector('i'), { x: 0 });
+            
+            lcdText.innerText = "SYSTEM STANDBY";
+            lcdText.style.color = "#0f172a";
+            lcdScreen.style.backgroundColor = "#0ea5e9";
+
+            const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+            // Reveal layout
+            tl.to(left, { opacity: 1, x: 0, duration: 1, startAt: { x: -50 } })
+              .to(right, { opacity: 1, x: 0, duration: 1, startAt: { x: 50 } }, "-=0.8")
+              .to(circuitImg, { scale: 1.05, duration: 8, ease: "sine.inOut" }, "-=1");
+
+            // --- Workflow Animation Sequence ---
+            // 1. Keypad Input
+            tl.to(dot, { opacity: 1, duration: 0.3 }, "+=0.5")
+              .call(() => { lcdText.innerText = "SCANNING..."; })
+              .to(a1, { height: "35%", duration: 1 })
+              .to(dot, { top: "50%", duration: 1 }, "<");
+
+            // 2. CPU Processing
+            tl.to(cpuPulse, { scale: 1.2, opacity: 0, duration: 0.4, yoyo: true, repeat: 3 })
+              .to(dot, { opacity: 0, duration: 0.2 }, "-=1.5")
+              .call(() => { lcdText.innerText = "CHECKING MATCH"; });
+
+            // 3. Branch 1: Access Granted
+            tl.to(dot, { opacity: 1, duration: 0.2 })
+              .to(a2L, { width: "25%", duration: 0.5 }, "branchYes")
+              .to(dot, { left: "25%", duration: 0.5 }, "branchYes")
+              .to(a3, { height: "30%", duration: 0.5 }, "downYes")
+              .to(dot, { top: "80%", duration: 0.5 }, "downYes")
+              .call(() => {
+                  yesNode.classList.add('active');
+                  lcdText.innerText = "ACCESS GRANTED";
+                  lcdScreen.style.backgroundColor = "#10b981"; // Green
+                  gsap.to(yesNode.querySelector('i'), { rotation: 90, duration: 0.5, ease: "back.out(2)" });
+              })
+              .to(dot, { opacity: 0, duration: 0.2 })
+              
+            // 4. Branch 2: Access Denied (Simulated after delay)
+            .call(() => {
+                // Reset for second branch
+                yesNode.classList.remove('active');
+                gsap.to(yesNode.querySelector('i'), { rotation: 0, duration: 0.5 });
+                lcdText.innerText = "SCANNING...";
+                lcdText.style.color = "#0f172a";
+                lcdScreen.style.backgroundColor = "#0ea5e9";
+                gsap.set(dot, { top: "50%", left: "50%", opacity: 1 });
+            }, null, "+=2.5")
+            .to(cpuPulse, { scale: 1.2, opacity: 0, duration: 0.4, yoyo: true, repeat: 3 })
+            .call(() => { lcdText.innerText = "CHECKING MATCH"; }, null, "-=1.2")
+            .to(a2R, { width: "25%", duration: 0.5 }, "branchNo")
+            .to(dot, { left: "75%", duration: 0.5 }, "branchNo")
+            .to(a4, { height: "30%", duration: 0.5 }, "downNo")
+            .to(dot, { top: "80%", duration: 0.5 }, "downNo")
+            .call(() => {
+                noNode.classList.add('active');
+                lcdText.innerText = "ACCESS DENIED";
+                lcdText.style.color = "#fff";
+                lcdScreen.style.backgroundColor = "#ef4444"; // Red
+                gsap.to(noNode.querySelector('i'), { x: -3, duration: 0.05, yoyo: true, repeat: 10 });
+            })
+            .to(dot, { opacity: 0, duration: 0.2 });
+        };
+
+        window.animateSlide10 = () => {
+            const slide = document.querySelector('#slide-10');
+            if (!slide) return;
+
+            const orbs = slide.querySelectorAll('.orb');
+            const shapes = slide.querySelectorAll('.glass-shape');
+            const header = slide.querySelector('.s10-header');
+            const cards = slide.querySelectorAll('.s10-card');
+            const points = slide.querySelectorAll('.s10-point');
+            const footer = slide.querySelector('.s10-footer');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            tl.fromTo(orbs, 
+                { opacity: 0, scale: 0.8 }, 
+                { opacity: 0.6, scale: 1, duration: 4, stagger: 0.2, ease: "sine.out" }
+            )
+            .fromTo(shapes,
+                { opacity: 0, y: 100, rotation: -20 },
+                { opacity: 1, y: 0, rotation: 0, duration: 2.5, stagger: 0.3 },
+                "-=3"
+            )
+            .fromTo(header,
+                { opacity: 0, scale: 0.95, y: 40 },
+                { opacity: 1, scale: 1, y: 0, duration: 1.5 },
+                "-=2"
+            )
+            .fromTo(cards,
+                { opacity: 0, y: 50 },
+                { opacity: 1, y: 0, duration: 1.5, stagger: 0.5 },
+                "-=1"
+            )
+            .fromTo(points,
+                { opacity: 0, x: -20 },
+                { opacity: 1, x: 0, duration: 0.8, stagger: 0.15 },
+                "-=1.2"
+            )
+            .fromTo(footer,
+                { opacity: 0, y: 20, filter: "blur(10px)" },
+                { opacity: 1, y: 0, filter: "blur(0px)", duration: 2, ease: "power2.inOut" },
+                "-=0.5"
+            );
+        };
+
+        window.animateSlide11 = () => {
+            const slide = document.querySelector('#slide-11');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-11-title');
+            const lineFill = slide.querySelector('.tl-line-fill');
+            const dot = slide.querySelector('.tl-traveling-dot');
+            const nodes = slide.querySelectorAll('.tl-node');
+            const contents = slide.querySelectorAll('.tl-content');
+            const footer = slide.querySelector('.slide-11-footer');
+            
+            const isMobile = window.innerWidth <= 900;
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            // Reset
+            gsap.set(lineFill, { width: isMobile ? "2px" : "0%", height: isMobile ? "0%" : "2px" });
+            gsap.set(dot, { opacity: 0, top: isMobile ? "0%" : "50%", left: isMobile ? "20px" : "0%" });
+            gsap.set(nodes, { scale: 0, opacity: 0 });
+            gsap.set(contents, { opacity: 0, y: 20 });
+            nodes.forEach(n => n.classList.remove('active'));
+
+            tl.to(title, { opacity: 1, y: 0, duration: 1, startAt: { y: -30 } });
+
+            // Timeline draw and dot travel
+            tl.to(dot, { opacity: 1, duration: 0.3 });
+            
+            const travelDuration = 3;
+            
+            tl.to(lineFill, { 
+                width: isMobile ? "2px" : "100%", 
+                height: isMobile ? "100%" : "2px", 
+                duration: travelDuration, 
+                ease: "power1.inOut" 
+            }, "draw");
+            
+            tl.to(dot, { 
+                left: isMobile ? "20px" : "100%", 
+                top: isMobile ? "100%" : "50%",
+                duration: travelDuration, 
+                ease: "power1.inOut" 
+            }, "draw");
+
+            // Pop nodes based on percentages
+            const positions = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
+            positions.forEach((pos, idx) => {
+                const triggerTime = travelDuration * pos;
+                tl.to(nodes[idx], { 
+                    opacity: 1, 
+                    scale: 1, 
+                    duration: 0.5, 
+                    ease: "back.out(2)",
+                    onStart: () => nodes[idx].classList.add('active')
+                }, `draw+=${triggerTime}`)
+                .to(contents[idx], { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.6 
+                }, `draw+=${triggerTime + 0.1}`);
+            });
+            
+            // Final dot hide
+            tl.to(dot, { opacity: 0, duration: 0.3, scale: 2 }, `draw+=${travelDuration}`);
+
+            // Footer
+            tl.to(footer, { opacity: 1, filter: "blur(0px)", duration: 1, startAt: { filter: "blur(10px)" } }, `draw+=${travelDuration - 0.5}`);
+        };
+
+        window.animateSlide12 = () => {
+            const slide = document.querySelector('#slide-12');
+            if (!slide) return;
+
+            const title = slide.querySelector('.slide-12-title');
+            const subtext = slide.querySelector('.slide-12-subtext');
+            const glow = slide.querySelector('.s12-title-glow');
+            const contactGrid = slide.querySelector('.s12-contact-grid');
+            const footer = slide.querySelector('.slide-12-footer');
+            const blobs = slide.querySelectorAll('.s12-blob');
+
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            // Background blobs fade in
+            tl.fromTo(blobs, 
+                { opacity: 0, scale: 0.8 }, 
+                { opacity: 0.5, scale: 1, duration: 3, stagger: 0.2, ease: "sine.inOut" }
+            )
+            // Title
+            .to(title, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                startAt: { y: 30 }
+            }, "-=2")
+            // Title Glow
+            .to(glow, {
+                opacity: 1,
+                scale: 1.2,
+                duration: 2,
+                ease: "power2.inOut"
+            }, "-=1.5")
+            // Subtext
+            .to(subtext, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: 20 }
+            }, "-=1")
+            // Contact Grid
+            .to(contactGrid, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                startAt: { y: 20 }
+            }, "-=0.8")
+            // Footer
+            .to(footer, {
+                opacity: 1,
+                duration: 1.5
+            }, "-=0.5");
+            
+            // Continuous glow breathing
+            gsap.to(glow, {
+                scale: 1.3,
+                opacity: 0.6,
+                duration: 3,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut",
+                delay: 1.5
+            });
+        };
+
+        // Optimized Parallax for Slide 10
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            if (!isPresentationMode || currentSlide !== 9) return;
+            mouseX = (window.innerWidth / 2 - e.clientX) / window.innerWidth;
+            mouseY = (window.innerHeight / 2 - e.clientY) / window.innerHeight;
+        });
+
+        function updateParallax() {
+            if (isPresentationMode && currentSlide === 9) {
+                const shapes = document.querySelectorAll('#slide-10 .glass-shape');
+                shapes.forEach(shape => {
+                    const speed = parseFloat(shape.getAttribute('data-speed'));
+                    gsap.to(shape, { 
+                        x: mouseX * speed * 500, 
+                        y: mouseY * speed * 500, 
+                        duration: 1, 
+                        overwrite: 'auto'
+                    });
+                });
+            }
+            requestAnimationFrame(updateParallax);
+        }
+        updateParallax();
+
+        const triggerAnimation = (index) => {
+            const fn = window[`animateSlide${index + 1}`];
+            if (typeof fn === 'function') fn();
+            updateUI();
+        };
+
+        // --- Navigation Logic ---
+        const goToSlide = (index) => {
+            if (index < 0 || index >= totalSlides) return;
+            
+            currentSlide = index;
+
+            if (isPresentationMode) {
+                // Horizontal movement (viewport width calculation fix)
+                gsap.to(slidesContainer, {
+                    x: `-${currentSlide * 100}vw`,
+                    duration: 0.5,
+                    ease: "power3.inOut",
+                    onComplete: () => triggerAnimation(currentSlide)
+                });
+            } else {
+                // Vertical scroll
+                lenis.scrollTo(`#slide-${currentSlide + 1}`);
+            }
+            updateUI();
+        };
+
+        const updateUI = () => {
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            const iconName = isPresentationMode ? 'presentation' : 'eye';
+            const modeText = isPresentationMode ? 'Presentation Mode' : 'View Mode';
+            
+            modeBadge.innerHTML = `<i data-lucide="${iconName}" size="14"></i><span>${modeText}</span>`;
+            lucide.createIcons();
+        };
+
+        const togglePresentationMode = () => {
+            isPresentationMode = !isPresentationMode;
+            document.body.classList.toggle('presentation-mode', isPresentationMode);
+            
+            if (isPresentationMode) {
+                lenis.stop();
+                gsap.set(slidesContainer, { x: `-${currentSlide * 100}vw` });
+                
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => alert("Fullscreen blocked by your browser. This usually happens if you open a local file directly. Press F11 instead to go fullscreen!"));
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+
+                // Trigger animation for the slide we are currently viewing
+                triggerAnimation(currentSlide);
+            } else {
+                lenis.start();
+                gsap.set(slidesContainer, { x: 0 });
+                lenis.scrollTo(`#slide-${currentSlide + 1}`, { immediate: true });
+                
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+            
+            updateUI();
+        };
+
+        // --- Event Listeners ---
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'p') {
+                togglePresentationMode();
+            }
+
+            if (isPresentationMode) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToSlide(currentSlide + 1);
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToSlide(currentSlide - 1);
+            }
+        });
+
+        document.getElementById('mobile-toggle').addEventListener('click', () => {
+            if (!isPresentationMode) togglePresentationMode();
+        });
+
+        // --- Intersection Observer for Scroll Mode ---
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            if (isPresentationMode) return;
+            
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = parseInt(entry.target.id.split('-')[1]) - 1;
+                    currentSlide = index;
+                    // No animations in View Mode!
+                    updateUI(); // Added to fix slide counter update while scrolling
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
+
+        // --- Swipe Detection ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        window.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        window.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        const handleSwipe = () => {
+            if (!isPresentationMode) return;
+            
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                goToSlide(currentSlide + 1); // Swipe Left
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                goToSlide(currentSlide - 1); // Swipe Right
+            }
+        };
+
+        // Initialize UI
+        updateUI();
+
+    </script>
+</body>
+</html>
+
