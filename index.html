@@ -776,32 +776,44 @@
 
         /* Components Showcase */
         .components-grid {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 2rem;
-            justify-content: center;
+            width: 100%;
         }
 
         .hw-component {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: all 0.4s ease;
+        }
+
+        .hw-component:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         }
 
         .hw-component img {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
             mix-blend-mode: multiply;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15));
-            border-radius: 12px;
-            background: transparent;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            transition: transform 0.4s ease;
         }
 
         .hw-component:hover img {
-            transform: scale(1.15) translateY(-5px);
+            transform: scale(1.1);
         }
 
         .hw-label {
@@ -834,9 +846,13 @@
         body.presentation-mode #slide-3 .slide-3-reflection {
             font-size: 1.15rem;
         }
+        body.presentation-mode #slide-3 .components-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+        }
         body.presentation-mode #slide-3 .hw-component img {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
         }
 
         @media (max-width: 900px) {
