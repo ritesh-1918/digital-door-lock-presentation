@@ -465,19 +465,16 @@
             pointer-events: none;
         }
 
-        .header-strip img {
-            max-height: 90px;
-            object-fit: contain;
-        }
+        .header-strip img { max-height: 120px; object-fit: contain; }
+        .header-strip img:first-child { max-height: 160px; }
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .header-strip {
                 padding: 1.5rem;
             }
-            .header-strip img {
-                max-height: 40px;
-            }
+            .header-strip img { max-height: 120px; object-fit: contain; }
+        .header-strip img:first-child { max-height: 160px; }
             .details-grid {
                 grid-template-columns: 1fr;
                 gap: 1.25rem;
@@ -2976,7 +2973,7 @@
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Organization</span>
-                        <span class="detail-value">HMIES Pvt LTD</span>
+                        <span class="detail-value">HIMES Pvt LTD</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Department</span>
