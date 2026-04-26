@@ -103,7 +103,7 @@
         }
 
         p {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             color: #64748b;
             font-weight: 400;
         }
@@ -371,28 +371,28 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2.5rem;
+            gap: 3.5rem;
             z-index: 10;
         }
 
         .title-premium {
             font-family: 'Sora', sans-serif;
-            font-size: clamp(2.5rem, 4.5vw, 64px);
+            font-size: clamp(3rem, 5.5vw, 78px);
             font-weight: 800;
             letter-spacing: -0.02em;
             line-height: 1.1;
             margin: 0 auto;
-            max-width: 900px;
+            max-width: 1100px;
             background: linear-gradient(135deg, #0f172a 0%, #0ea5e9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .subtitle-premium {
-            font-size: clamp(1.5rem, 3vw, 32px);
+            font-size: clamp(1.5rem, 3.5vw, 36px);
             color: #475569;
             font-weight: 500;
-            max-width: 900px;
+            max-width: 1100px;
         }
 
 
@@ -400,9 +400,9 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             justify-content: center;
-            max-width: 800px;
-            column-gap: 6rem;
-            row-gap: 1.5rem;
+            max-width: 1000px;
+            column-gap: 8rem;
+            row-gap: 2rem;
             width: 100%;
             margin-top: 1rem;
             text-align: left;
@@ -416,7 +416,7 @@
 
         .detail-label {
             font-family: 'Sora', sans-serif;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.15em;
@@ -424,7 +424,7 @@
         }
 
         .detail-value {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             color: #1e293b;
             font-weight: 500;
         }
@@ -476,10 +476,16 @@
             .header-strip img { max-height: 120px; object-fit: contain; }
         .header-strip img:first-child { max-height: 160px; }
             .details-grid {
-                grid-template-columns: 1fr;
-                gap: 1.25rem;
-                text-align: center;
-            }
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            justify-content: center;
+            max-width: 1000px;
+            column-gap: 8rem;
+            row-gap: 2rem;
+            width: 100%;
+            margin-top: 1rem;
+            text-align: left;
+        }
 
             .premium-container {
                 gap: 1.5rem;
@@ -676,7 +682,7 @@
             gap: 6rem;
         }
         body.presentation-mode #slide-2 .editor-body p {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
 
         /* Responsive Adjustments */
@@ -854,7 +860,7 @@
         }
 
         .hw-label {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #0f172a;
             background: rgba(255, 255, 255, 0.8);
@@ -885,7 +891,7 @@
         }
         body.presentation-mode #slide-3 .components-grid {
             grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
+            gap: 3.5rem;
         }
         body.presentation-mode #slide-3 .hw-component img {
             width: 140px;
@@ -1060,7 +1066,7 @@
 
         .panel-info h3 {
             margin: 0 0 0.25rem 0;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             color: #0f172a;
             font-weight: 700;
         }
@@ -1080,7 +1086,7 @@
             background: #0f172a;
             color: #94a3b8;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             padding: 0 4rem;
@@ -1487,7 +1493,7 @@
         /* Presentation Mode Overrides */
         body.presentation-mode #slide-6 .slide-6-container {
             max-width: 1200px;
-            gap: 2.5rem; /* Tightly controlled */
+            gap: 3.5rem; /* Tightly controlled */
         }
         body.presentation-mode #slide-6 .skill-grid {
             gap: 1.5rem;
@@ -1691,7 +1697,7 @@
 
         /* Presentation Mode Overrides */
         body.presentation-mode #slide-7 .slide-7-container {
-            gap: 2.5rem; /* Tightly controlled to prevent vertical clipping */
+            gap: 3.5rem; /* Tightly controlled to prevent vertical clipping */
             max-width: 1300px;
         }
         body.presentation-mode #slide-7 .slide-7-title {
@@ -1712,7 +1718,7 @@
             padding: 1rem 3rem;
         }
         body.presentation-mode #slide-7 .slide-7-highlight p {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
 
         @media (max-width: 900px) {
@@ -1838,7 +1844,7 @@
         .hw-node span {
             font-weight: 600;
             color: #1e293b;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             text-align: center;
             line-height: 1.2;
         }
@@ -2015,7 +2021,7 @@
             font-size: 1.1rem;
         }
         body.presentation-mode #slide-8 .sw-card p {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
         body.presentation-mode #slide-8 .concept-tags li {
             font-size: 1.05rem;
@@ -2202,7 +2208,7 @@
         }
 
         .wf-node i { color: #94a3b8; transition: all 0.3s; }
-        .wf-node span { font-weight: 600; font-size: 0.85rem; display: flex; flex-direction: column; }
+        .wf-node span { font-weight: 600; font-size: 0.95rem; display: flex; flex-direction: column; }
         .wf-node span small { font-size: 0.65rem; color: #64748b; font-weight: normal; margin-top: 0.1rem; }
 
         .node-in { top: 15%; left: 50%; }
@@ -2239,7 +2245,7 @@
 
         .lcd-text {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #0f172a;
             text-transform: uppercase;
@@ -2453,10 +2459,10 @@
             width: 45%;
         }
         body.presentation-mode #slide-10 .s10-card h3 {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
         body.presentation-mode #slide-10 .s10-point {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             margin-bottom: 1.5rem;
         }
         body.presentation-mode #slide-10 .s10-footer {
@@ -2667,7 +2673,7 @@
             height: 400px;
         }
         body.presentation-mode #slide-11 .tl-content h4 {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
         body.presentation-mode #slide-11 .tl-content p {
             font-size: 0.95rem;
@@ -2851,7 +2857,7 @@
             margin-top: 2rem;
         }
         body.presentation-mode #slide-12 .s12-contact-item {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
         body.presentation-mode #slide-12 .slide-12-footer {
             font-size: 1.2rem;
@@ -2902,7 +2908,17 @@
                 position: fixed; /* Keeps backgrounds static while content scrolls */
             }
 
-            .details-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            justify-content: center;
+            max-width: 1000px;
+            column-gap: 8rem;
+            row-gap: 2rem;
+            width: 100%;
+            margin-top: 1rem;
+            text-align: left;
+        }
             .premium-container { padding: 0 5%; }
             .slide-2-container { flex-direction: column; padding: 5% !important; text-align: center; }
             .slide-2-left, .slide-2-right { width: 100%; }
