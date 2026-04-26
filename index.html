@@ -2824,6 +2824,26 @@
             will-change: transform, opacity;
         }
 
+        /* Mobile Specific Overrides */
+        @media (max-width: 600px) {
+            .details-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .premium-container { padding: 0 5%; }
+            .slide-2-container { flex-direction: column; padding: 5% !important; text-align: center; }
+            .slide-2-left, .slide-2-right { width: 100%; }
+            .slide-3-container { flex-direction: column; overflow-y: auto; padding-top: 5vh; }
+            .components-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .hardware-layer { flex-direction: column; align-items: center; gap: 1.5rem; height: auto; padding-bottom: 2rem; }
+            .central-hub { margin: 1rem 0; }
+            .bottom-layers { flex-direction: column; gap: 1.5rem; }
+            .workflow-container { flex-direction: column; gap: 2rem; padding: 5% 0; overflow-y: auto; }
+            .wf-visual { height: 40vh; min-height: 300px; }
+            .wf-flow { height: 50vh; min-height: 400px; }
+            .s10-content { flex-direction: column; gap: 1.5rem; margin-top: 2rem; }
+            .s10-card { width: 90% !important; margin: 0 !important; align-self: center !important; }
+            .s12-contact-grid { padding: 1rem; border-radius: 20px; }
+            .slide-counter { display: none; } /* Hide counter on very small mobile screens for space */
+        }
+
     </style>
 </head>
 <body>
